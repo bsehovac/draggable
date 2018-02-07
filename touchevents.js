@@ -27,19 +27,25 @@
     touch.element.addEventListener(events.start, start);
 
     function start(e) {
-      e.position= getPosition(e);
+      var position= getPosition(e);
+      e.x = position.x;
+      e.y = position.y;
       touch.start(e, istouch);
       document.addEventListener(events.move, move, touch.passive);
       document.addEventListener(events.end, end);
     }
 
     function move(e) {
-      e.position = getPosition(e);
+      var position= getPosition(e);
+      e.x = position.x;
+      e.y = position.y;
       touch.move(e, istouch);
     }
 
     function end(e) {
-      e.position = getPosition(e);
+      var position= getPosition(e);
+      e.x = position.x;
+      e.y = position.y;
       touch.end(e, istouch);
       document.removeEventListener(events.move, move, touch.passive);
       document.removeEventListener(events.end, end); 
