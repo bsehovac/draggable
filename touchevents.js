@@ -47,8 +47,8 @@
       e.y = position.y;
       touch.start(e, istouch);
       if (!istouch && moveActive) {
-        document.addEventListener(events.move, move, touch.passive);
-        document.addEventListener(events.end, end, false);
+        window.addEventListener(events.move, move, touch.passive);
+        window.addEventListener(events.end, end, false);
       }
     }
 
@@ -65,8 +65,8 @@
       e.y = position.y;
       touch.end(e, istouch);
       if (!istouch && moveActive) {
-        document.removeEventListener(events.move, move, touch.passive);
-        document.removeEventListener(events.end, end, false); 
+        window.removeEventListener(events.move, move, touch.passive);
+        window.removeEventListener(events.end, end, false); 
       }
     }
   };
