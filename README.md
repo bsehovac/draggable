@@ -15,17 +15,17 @@ TouchEvents(HTMLElement element, Boolean moveActive, Boolean passive)
 ## Usage
 
 ```javascript
-var touchEvents = new TouchEvents('#element');
+var touchEvents = new TouchEvents('#element', true);
 
-touchEvents.start = function(e) {
+touchEvents.start = function(e, istouch) {
   // code
 };
 
-touchEvents.move = function(e) {
+touchEvents.move = function(e, istouch) {
   // code
 };
 
-touchEvents.end = function(e) {
+touchEvents.end = function(e, istouch) {
   // code
 };
 ```
@@ -38,5 +38,24 @@ var touchEvents = new TouchEvents('#element');
 touchEvents.move = function(e) {
   var x = e.x,
       y = e.y;
+};
+```
+
+## Disable document scrolling when dragging element
+
+```javascript
+var touchEvents = new TouchEvents('#element', false, false);
+
+touchEvents.start = function(e) {
+  // code
+};
+
+touchEvents.move = function(e) {
+  e.preventDefault();
+  // code
+};
+
+touchEvents.end = function(e) {
+  // code
 };
 ```
