@@ -33,7 +33,7 @@
     var touch = this;
     var istouch = (events.start == 'touchstart') ? true : false;
 
-    if (!istouch && moveActive) {
+    if (moveActive) {
       touch.element.addEventListener(events.start, start, false);
       touch.element.addEventListener(events.move, start, false);
       touch.element.addEventListener(events.end, start, false);
@@ -46,7 +46,7 @@
       e.x = position.x;
       e.y = position.y;
       touch.start(e, istouch);
-      if (!istouch && moveActive) {
+      if (moveActive) {
         window.addEventListener(events.move, move, touch.passive);
         window.addEventListener(events.end, end, false);
       }
@@ -64,7 +64,7 @@
       e.x = position.x;
       e.y = position.y;
       touch.end(e, istouch);
-      if (!istouch && moveActive) {
+      if (moveActive) {
         window.removeEventListener(events.move, move, touch.passive);
         window.removeEventListener(events.end, end, false); 
       }
