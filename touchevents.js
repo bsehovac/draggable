@@ -11,6 +11,8 @@
       safariFix = true;
     }
 
+    moveActive = (typeof moveActive !== 'undefined') ? moveActive : true;
+
     touch.element = (typeof element === 'string') ?
       document.querySelector(element) :
       element;
@@ -35,8 +37,8 @@
 
     if (moveActive) {
       touch.element.addEventListener(events.start, start, false);
-      touch.element.addEventListener(events.move, start, false);
-      touch.element.addEventListener(events.end, start, false);
+      touch.element.addEventListener(events.move, move, false);
+      touch.element.addEventListener(events.end, end, false);
     }
 
     touch.element.addEventListener(events.start, start, false);
@@ -46,7 +48,7 @@
       e.x = position.x;
       e.y = position.y;
       touch.start(e, istouch);
-      if (moveActive) {
+      if (!moveActive) {
         window.addEventListener(events.move, move, touch.passive);
         window.addEventListener(events.end, end, false);
       }
@@ -64,7 +66,7 @@
       e.x = position.x;
       e.y = position.y;
       touch.end(e, istouch);
-      if (moveActive) {
+      if (!moveActive) {
         window.removeEventListener(events.move, move, touch.passive);
         window.removeEventListener(events.end, end, false); 
       }
