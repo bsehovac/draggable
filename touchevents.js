@@ -1,13 +1,22 @@
 (function() {
 
   var passiveSupport = getPassiveSupport();
+  var safariFix = false;
   
-  this.TouchEvents = function(element, passive, getPosition) {
+  this.TouchEvents = function(element, moveActive, passive) {
     var touch = this;
 
-    touch.element = element;
+    if (!safariFix) {
+      window.addEventListener('touchmove', function() {});
+      safariFix = true;
+    }
+
+    touch.element = (typeof element === 'string') ?
+      document.querySelector(element) :
+      element;
     touch.passive = (typeof passive !== 'undefined' && passiveSupport) ?
-      { passive: passive } : false;
+      { passive: passive } :
+      false;
 
     touch.start = function() {};
     touch.move = function() {};
@@ -16,23 +25,31 @@
     var touchEvents = { start: 'touchstart', move: 'touchmove', end: 'touchend' };
     var mouseEvents = { start: 'mousedown', move: 'mousemove', end: 'mouseup' };
 
-    touch.initEvents(mouseEvents);
+    touch.initEvents(mouseEvents, moveActive);
     touch.initEvents(touchEvents);
   };
 
-  this.TouchEvents.prototype.initEvents = function(events) {
+  this.TouchEvents.prototype.initEvents = function(events, moveActive) {
     var touch = this;
     var istouch = (events.start == 'touchstart') ? true : false;
 
-    touch.element.addEventListener(events.start, start);
+    if (!istouch && moveActive) {
+      touch.element.addEventListener(events.start, start, false);
+      touch.element.addEventListener(events.move, start, false);
+      touch.element.addEventListener(events.end, start, false);
+    }
+
+    touch.element.addEventListener(events.start, start, false);
 
     function start(e) {
       var position= getPosition(e);
       e.x = position.x;
       e.y = position.y;
       touch.start(e, istouch);
-      document.addEventListener(events.move, move, touch.passive);
-      document.addEventListener(events.end, end);
+      if (!istouch && moveActive) {
+        document.addEventListener(events.move, move, touch.passive);
+        document.addEventListener(events.end, end, false);
+      }
     }
 
     function move(e) {
@@ -47,8 +64,10 @@
       e.x = position.x;
       e.y = position.y;
       touch.end(e, istouch);
-      document.removeEventListener(events.move, move, touch.passive);
-      document.removeEventListener(events.end, end); 
+      if (!istouch && moveActive) {
+        document.removeEventListener(events.move, move, touch.passive);
+        document.removeEventListener(events.end, end, false); 
+      }
     }
   };
 
