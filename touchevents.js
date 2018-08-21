@@ -1,5 +1,19 @@
 window.addEventListener('touchmove', function() {});
 
+function extendObject( options, defaults ) {
+  var extended = {}, key;
+
+  for ( key in defaults )
+    if ( defaults.hasOwnProperty( key ) )
+      extended[key] = defaults[key];
+
+  for ( key in options )
+    if ( options.hasOwnProperty( key ) )
+      extended[key] = options[key];
+
+  return extended;
+}
+
 function TouchEvents( element, options ) {
   var t = this;
 
