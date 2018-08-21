@@ -1,99 +1,104 @@
-(function() {
+window.addEventListener('touchmove', function() {});
 
-  var passiveSupport = getPassiveSupport();
-  var safariFix = false;
+function TouchEvents( element, options ) {
+  var t = this;
+
+  options = extendObject((( typeof options !== 'undefined' ) ? options : {}), {
+    passiveEvent: false,
+    touchEvents: true,
+    mouseEvents: true,
+    useVector: false,
+    convertPosition: false,
+    start: function() {},
+    drag: function() {},
+    end: function() {},
+    move: false,
+  });
+
+  t.options = options;
+
+  t.position = ( typeof options.useVector === 'function' )
+    ? new options.useVector()
+    : { x: 0, y: 0 };
+
+  t.converted = ( typeof options.useVector === 'function' )
+    ? new options.useVector()
+    : { x: 0, y: 0 };
+
+  t.element = ( typeof element === 'string' )
+    ? document.querySelector(element)
+    : element;
+
+  t.passive = { passive: options.passiveEvent };
+
+  t.touch = null;
+
+  t.functions = {
+
+    start: function( event ) {
+      t.getPosition( event );
+      t.touch = (event.type == 'touchstart');
+      options.start( event, t.position, t.converted, t.touch );
+      window.addEventListener( (t.touch) ? 'touchmove' : 'mousemove', t.functions.drag, t.passive );
+      window.addEventListener( (t.touch) ? 'touchend' : 'mouseup', t.functions.end, false );
+    },
+
+    drag: function( event ) {
+      t.getPosition( event );
+      options.drag( event, t.position, t.converted, t.touch );
+    },
+
+    end: function( event ) {
+      t.getPosition( event );
+      options.end( event, t.position, t.converted, t.touch );
+      window.removeEventListener( (t.touch) ? 'touchmove' : 'mousemove', t.functions.drag, t.passive );
+      window.removeEventListener( (t.touch) ? 'touchend' : 'mouseup', t.functions.end, false );
+    },
+
+    move: function( event ) {
+      t.getPosition( event );
+      options.move( event, t.position, t.converted, false );
+    },
+
+  };
+
+   return t;
+}
+
+TouchEvents.prototype.init = function() {
+  var t = this;
+
+  t.element.addEventListener( 'touchstart', t.functions.start, false );
+  t.element.addEventListener( 'mousedown', t.functions.start, false );
+
+  if (typeof t.options.move === 'function')
+    t.element.addEventListener( 'mousemove', t.functions.move, false );
+
+  return t;
+};
+
+TouchEvents.prototype.dispose = function() {
+  var t = this;
+
+  t.element.removeEventListener( 'touchstart', t.functions.start, false );
+  t.element.removeEventListener( 'mousedown', t.functions.start, false );
+
+  if (typeof t.options.move === 'function')
+    t.element.removeEventListener( 'mousemove', t.functions.start, false );
+
+  return t;
+};
+
+TouchEvents.prototype.getPosition = function( event ) {
+  var t = this;
+  var offset = t.element.getBoundingClientRect();
+  var e = event.changedTouches ? event.changedTouches[0] : event;
+
+  t.position.x = e.pageX - offset.left;
+  t.position.y = e.pageY - offset.top;
   
-  this.TouchEvents = function(element, moveActive, passive) {
-    var touch = this;
+  if (t.options.convertPosition !== true) return;
 
-    if (!safariFix) {
-      window.addEventListener('touchmove', function() {});
-      safariFix = true;
-    }
-
-    moveActive = (typeof moveActive !== 'undefined') ? moveActive : true;
-
-    touch.element = (typeof element === 'string') ?
-      document.querySelector(element) :
-      element;
-    touch.passive = (typeof passive !== 'undefined' && passiveSupport) ?
-      { passive: passive } :
-      false;
-
-    touch.start = function() {};
-    touch.move = function() {};
-    touch.end = function() {};
-
-    var touchEvents = { start: 'touchstart', move: 'touchmove', end: 'touchend' };
-    var mouseEvents = { start: 'mousedown', move: 'mousemove', end: 'mouseup' };
-
-    touch.initEvents(mouseEvents, moveActive);
-    touch.initEvents(touchEvents);
-  };
-
-  this.TouchEvents.prototype.initEvents = function(events, moveActive) {
-    var touch = this;
-    var istouch = (events.start == 'touchstart') ? true : false;
-
-    if (moveActive) {
-      touch.element.addEventListener(events.start, start, false);
-      touch.element.addEventListener(events.move, move, false);
-      touch.element.addEventListener(events.end, end, false);
-    }
-
-    touch.element.addEventListener(events.start, start, false);
-
-    function start(e) {
-      var position= getPosition(e);
-      e.x = position.x;
-      e.y = position.y;
-      touch.start(e, istouch);
-      if (!moveActive) {
-        window.addEventListener(events.move, move, touch.passive);
-        window.addEventListener(events.end, end, false);
-      }
-    }
-
-    function move(e) {
-      var position= getPosition(e);
-      e.x = position.x;
-      e.y = position.y;
-      touch.move(e, istouch);
-    }
-
-    function end(e) {
-      var position= getPosition(e);
-      e.x = position.x;
-      e.y = position.y;
-      touch.end(e, istouch);
-      if (!moveActive) {
-        window.removeEventListener(events.move, move, touch.passive);
-        window.removeEventListener(events.end, end, false); 
-      }
-    }
-  };
-
-  function getPosition(e) {
-    e = event.changedTouches ? event.changedTouches[0] : e;
-    return { x: e.pageX, y: e.pageY };
-  }
-
-  function getPassiveSupport() {
-    var passiveSupported = false;
-
-    try {
-      var options = Object.defineProperty({}, 'passive', {
-        get: function() {
-          passiveSupported = true;
-        }
-      });
-      window.addEventListener('test', options, options);
-      window.removeEventListener('test', options, options);
-    } catch(err) {
-      passiveSupported = false;
-    }
-
-    return passiveSupported;
-  }
-
-})();
+  t.converted.x = ( t.position.x / t.element.offsetWidth ) * 2 - 1;
+  t.converted.y = ( t.position.y / t.element.offsetHeight ) * 2 - 1;
+};
