@@ -5,29 +5,19 @@ Touch and Mouse events with passive scrolling support.
 ## Function
 
 ```javascript
-TouchEvents(HTMLElement element, Boolean moveActive, Boolean passive)
+TouchEvents(HTMLElement element, Object options)
 ```
 
 - **element**: `HTMLElement` or `String`. String must be CSS Selector, and will get only first element of query.
-- **moveActive**: If set to `true` mousemove listeners will fire always. If set to `false` move listener will fire only after mousedown. Default is `true`.
-- **passive**: Set the `{ passive: true || false }` option to touchmove on supported browsers. If not specified option will not be passed to event listener.
 
 ## Usage
 
 ```javascript
-var touchEvents = new TouchEvents('#element', true);
-
-touchEvents.start = function(e, istouch) {
-  // code
-};
-
-touchEvents.move = function(e, istouch) {
-  // code
-};
-
-touchEvents.end = function(e, istouch) {
-  // code
-};
+var touchEvents = new TouchEvents('#element', {
+  start: function( event, position, converted, touch ),
+  drag: function( event, position, converted, touch ),
+  end: function( event, position, converted, touch ),
+});
 ```
 
 ## Getting pageX and pageY
